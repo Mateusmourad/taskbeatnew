@@ -45,7 +45,21 @@ class MainActivity : AppCompatActivity() {
 
         categoryAdapter.setOnClickListener { selected ->
             if(selected.name == "+"){
-                Snackbar.make(rvCategory, "+ is selected", Snackbar.LENGTH_LONG).show()
+
+                val createCategoryBottomSheet = CreateCategoryBottomSheet{
+                    categoryName ->
+                    val categoryEntity = CategoryEntity(
+                        name = categoryName,
+                        isSelected = false
+                    )
+                    insertCategory(categoryEntity)
+                }
+
+                createCategoryBottomSheet.show(supportFragmentManager, "createCategoryBottomSheet")
+
+
+                //Snackbar.make(rvCategory, "+ is selected", Snackbar.LENGTH_LONG).show()
+
                 }else {
                 val categoryTemp = categories.map { item ->
                     when {
@@ -119,9 +133,10 @@ class MainActivity : AppCompatActivity() {
                         isSelected = false
                     )
                 )
-                categories = categoriesUiData
-
-                adapter.submitList(categoriesUiData)
+                GlobalScope.launch(Dispatchers.Main) {
+                    categories = categoriesUiData
+                    adapter.submitList(categoriesUiData)
+                }
             }
 
 
@@ -135,11 +150,18 @@ class MainActivity : AppCompatActivity() {
                         category = it.category
                     )
                 }
-
-               tasks = tasksUiData
+            GlobalScope.launch(Dispatchers.Main) {
+                tasks = tasksUiData
                 adapter.submitList(tasksUiData)
             }
+            }
         }
+
+    private fun insertCategory(categoryEntity: CategoryEntity){
+        GlobalScope.launch(Dispatchers.IO) {
+            categoryDao.inset(categoryEntity)
+        }
+    }
 
 
 }
