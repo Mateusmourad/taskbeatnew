@@ -25,6 +25,7 @@ class CreateCategoryBottomSheet(
         btnCreate.setOnClickListener{
             val name = tieCategoryName.text.toString()
             onCreateClicked.invoke(name)
+            dismiss()
         }
 
         return view
