@@ -1,5 +1,6 @@
 package com.devspace.taskbeats
 
+import android.icu.text.Transliterator.Position
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -14,8 +15,8 @@ import com.google.android.material.snackbar.Snackbar
 
 class CreateTaskBottomSheet (
 
+    private val categoryList: List<CategoryUiData>,
     private val onCreatedClicked: (TaskUiData) -> Unit,
-    private val categoryList: List<CategoryUiData>
     ) : BottomSheetDialogFragment() {
 
     override fun onCreateView(
@@ -33,10 +34,11 @@ class CreateTaskBottomSheet (
         btnCreate.setOnClickListener {
             val name = tieTaskName.text.toString()
             if(taskCategory != null) {
+                requireNotNull(taskCategory)
                 onCreatedClicked.invoke(
                    TaskUiData(
                        name = name,
-                       category = taskCategory
+                       category = requireNotNull(taskCategory)
                    )
                 )
                 dismiss()
@@ -59,15 +61,20 @@ class CreateTaskBottomSheet (
 
         }
 
-        spinner.onItemSelectedListener = object :AdapterView.OnItemSelectedListener{
-            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                TODO("Not yet implemented")
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ){
+                taskCategory = categoryStr[position]
             }
 
-            override fun onNothingSelected(p0: AdapterView<*>?) {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
             }
         }
-
 
         return view
 
