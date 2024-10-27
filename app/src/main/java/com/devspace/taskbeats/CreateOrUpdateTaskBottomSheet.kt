@@ -1,6 +1,5 @@
 package com.devspace.taskbeats
 
-import android.icu.text.Transliterator.Position
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -11,11 +10,13 @@ import android.view.LayoutInflater
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 
-class CreateTaskBottomSheet (
+class CreateOrUpdateTaskBottomSheet (
 
     private val categoryList: List<CategoryUiData>,
+    private val task: TaskUiData? = null,
     private val onCreatedClicked: (TaskUiData) -> Unit,
     ) : BottomSheetDialogFragment() {
 
@@ -24,10 +25,22 @@ class CreateTaskBottomSheet (
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.create_task_bottom_sheet, container, false)
+        val view = inflater.inflate(R.layout.create_or_updatetask_bottom_sheet, container, false)
 
+        val tvTitle = view.findViewById<TextView>(R.id.tv_title)
         val btnCreate = view.findViewById<Button>(R.id.btn_task_create)
         val tieTaskName = view.findViewById<TextInputEditText>(R.id.tie_task_name)
+
+        if(task == null) {
+            tvTitle.setText(R.string.create_task_tittle)
+            btnCreate.setText(R.string.create)
+        }else{
+            tvTitle.setText(R.string.update_task_tittle)
+            btnCreate.setText(R.string.update)
+
+            tieTaskName.setText(task.name)
+
+        }
 
         var taskCategory: String? = null
 
@@ -37,6 +50,7 @@ class CreateTaskBottomSheet (
                 requireNotNull(taskCategory)
                 onCreatedClicked.invoke(
                    TaskUiData(
+                       id = 0,
                        name = name,
                        category = requireNotNull(taskCategory)
                    )
