@@ -17,7 +17,8 @@ class CreateOrUpdateTaskBottomSheet (
 
     private val categoryList: List<CategoryUiData>,
     private val task: TaskUiData? = null,
-    private val onCreatedClicked: (TaskUiData) -> Unit,
+    private val onCreateClicked: (TaskUiData) -> Unit,
+    private val onUpdateClicked: (TaskUiData) -> Unit,
     ) : BottomSheetDialogFragment() {
 
     override fun onCreateView(
@@ -30,47 +31,17 @@ class CreateOrUpdateTaskBottomSheet (
         val tvTitle = view.findViewById<TextView>(R.id.tv_title)
         val btnCreate = view.findViewById<Button>(R.id.btn_task_create)
         val tieTaskName = view.findViewById<TextInputEditText>(R.id.tie_task_name)
-
-        if(task == null) {
-            tvTitle.setText(R.string.create_task_tittle)
-            btnCreate.setText(R.string.create)
-        }else{
-            tvTitle.setText(R.string.update_task_tittle)
-            btnCreate.setText(R.string.update)
-
-            tieTaskName.setText(task.name)
-
-        }
-
+        val spinner: Spinner = view.findViewById(R.id.category_list)
         var taskCategory: String? = null
 
-        btnCreate.setOnClickListener {
-            val name = tieTaskName.text.toString()
-            if(taskCategory != null) {
-                requireNotNull(taskCategory)
-                onCreatedClicked.invoke(
-                   TaskUiData(
-                       id = 0,
-                       name = name,
-                       category = requireNotNull(taskCategory)
-                   )
-                )
-                dismiss()
-            } else {
-                Snackbar.make(btnCreate,"Please select a category", Snackbar.LENGTH_LONG).show()
-            }
+        val categoryStr = categoryList.map {it.name}
 
-        }
-
-       val categoryStr = categoryList.map {it.name}
-
-        val spinner: Spinner = view.findViewById(R.id.category_list)
         ArrayAdapter(
             requireActivity().baseContext,
             android.R.layout.simple_spinner_item,
-            categoryStr.toList()
+            categoryStr
         ).also { adapter ->
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             spinner.adapter = adapter
 
         }
@@ -88,6 +59,56 @@ class CreateOrUpdateTaskBottomSheet (
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
+        }
+
+
+        if(task == null) {
+            tvTitle.setText(R.string.create_task_tittle)
+            btnCreate.setText(R.string.create)
+        }else{
+            tvTitle.setText(R.string.update_task_tittle)
+            btnCreate.setText(R.string.update)
+            tieTaskName.setText(task.name)
+
+            val currentCategory = categoryList.first { it.name == task.category }
+            val index = categoryList.indexOf(currentCategory)
+            spinner.setSelection(index)
+
+        }
+
+
+        btnCreate.setOnClickListener {
+            val name = tieTaskName.text.toString()
+            if(taskCategory != null) {
+
+                if (task == null) {
+                   // requireNotNull(taskCategory)
+                    onCreateClicked.invoke(
+                        TaskUiData(
+                            id = 0,
+                            name = name,
+                            category = requireNotNull(taskCategory)
+                        )
+                    )
+                }else{
+                    onUpdateClicked.invoke(
+                        TaskUiData(
+                            id = task.id,
+                            name = name,
+                            category = requireNotNull(taskCategory)
+                        )
+                    )
+                    //onUpdateClicked.invoke(
+                       // TaskUiData(
+                          //  id = task.id,
+                          //  name = name,
+                           // category = requireNotNull (taskCategory)
+                }
+                dismiss()
+            } else {
+                Snackbar.make(btnCreate,"Please select a category", Snackbar.LENGTH_LONG).show()
+            }
+
         }
 
         return view

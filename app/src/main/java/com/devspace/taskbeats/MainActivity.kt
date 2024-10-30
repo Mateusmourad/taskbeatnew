@@ -2,14 +2,9 @@ package com.devspace.taskbeats
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
-import android.provider.Settings.Global
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -195,17 +190,34 @@ class MainActivity() : AppCompatActivity() {
         }
     }
 
+    private fun updateTask(taskEntity: TaskEntity) {
+        GlobalScope.launch(Dispatchers.IO) {
+            taskDao.update(taskEntity)
+            getTasksFromDataBase()
+        }
+    }
+
+
     private fun showCreateUpdateTaskBottomSheet(taskUiData: TaskUiData? = null) {
         val createTaskBottomSheet = CreateOrUpdateTaskBottomSheet(
             task = taskUiData,
-            categoryList = categories
-        ) { taskToBeCreated ->
-            val taskEntityToBeInsert = TaskEntity(
-                name = taskToBeCreated.name,
-                category = taskToBeCreated.category
-            )
-            insertTask(taskEntityToBeInsert)
-        }
+            categoryList = categories,
+            onCreateClicked = { taskToBeCreated ->
+                    val taskEntityToBeInsert = TaskEntity(
+                        name = taskToBeCreated.name,
+                        category = taskToBeCreated.category
+                    )
+                insertTask(taskEntityToBeInsert)
+            },
+            onUpdateClicked = { taskToBeUpdated ->
+                val taskEntityToBeUpdate = TaskEntity(
+                    id = taskToBeUpdated.id,
+                    name = taskToBeUpdated.name,
+                    category = taskToBeUpdated.category
+                )
+                updateTask(taskEntityToBeUpdate)
+            }
+        )
 
         createTaskBottomSheet.show(
             supportFragmentManager,
