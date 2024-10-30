@@ -38,7 +38,7 @@ class TaskListAdapter :
             tvCategory.text = task.category
             tvTask.text = task.name
 
-            view.setOnClickListener{
+            view.rootView.setOnClickListener{
                 callback.invoke(task)
 
             }
