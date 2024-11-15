@@ -13,8 +13,17 @@ class CategoryListAdapter :
 
     private lateinit var onClick: (CategoryUiData) -> Unit
 
+    private lateinit var onLongClick: (CategoryUiData) -> Unit
+
     fun setOnClickListener(onClick: (CategoryUiData) -> Unit) {
         this.onClick = onClick
+    }
+
+    fun setOnLongListener(onLongClick: (CategoryUiData) -> Unit) {
+        this.onLongClick = onLongClick
+
+
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -25,18 +34,23 @@ class CategoryListAdapter :
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = getItem(position)
-        holder.bind(category, onClick)
+        holder.bind(category, onClick, onLongClick)
     }
 
     class CategoryViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         private val tvCategory = view.findViewById<TextView>(R.id.tv_category)
 
-        fun bind(category: CategoryUiData, onClick: (CategoryUiData) -> Unit) {
+        fun bind(category: CategoryUiData, onClick: (CategoryUiData) -> Unit,onLongClickListener: (CategoryUiData) -> Unit,) {
+
             tvCategory.text = category.name
             tvCategory.isSelected = category.isSelected
 
             view.setOnClickListener {
                 onClick.invoke(category)
+            }
+            view.setOnLongClickListener { onLongClickListener.invoke(category)
+                true
+
             }
         }
     }
